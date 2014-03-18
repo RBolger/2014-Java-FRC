@@ -157,16 +157,20 @@ public class RobotTemplate extends IterativeRobot {
         //start same way
         moveRollerArmDown();
         Timer.delay(1.5);
-        pickUp(); //might need to make this constant rather than timed
-        goForward();
-        //stop spinning
+        startRollerBar(); //might need to make this constant rather than timed
+        startDriveForward();
+        Timer.delay(1);
+        stopRollerBar();
+        stopDrive();
+        Timer.delay(0.5);
         hardStopUp();
         Timer.delay(1);
         shoot();
         Timer.delay(0.5);
         hardStopDown();
         Timer.delay(1);
-        pickUp();
+        startRollerBar();
+        Timer.delay(1);
         hardStopUp();
         Timer.delay(1);
         shoot();
