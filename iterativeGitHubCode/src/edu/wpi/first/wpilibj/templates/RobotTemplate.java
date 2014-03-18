@@ -43,7 +43,6 @@ public class RobotTemplate extends IterativeRobot {
     boolean longFiring = false; //Is the shooter performing a long shot?
     boolean isTimed = false; //Has the shooter delay timer running out?
     double shotTime; //Pegged to the FGPA timestamp, i.e. the global CRIO system time
-
     boolean flag1 = true;
     boolean flag2 = true;
 
