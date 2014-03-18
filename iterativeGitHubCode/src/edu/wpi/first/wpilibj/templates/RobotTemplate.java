@@ -43,9 +43,9 @@ public class RobotTemplate extends IterativeRobot {
     boolean longFiring = false; //Is the shooter performing a long shot?
     boolean isTimed = false; //Has the shooter delay timer running out?
     double shotTime; //Pegged to the FGPA timestamp, i.e. the global CRIO system time
-    
+
     //Flags for changing drive directions
-    boolean flag1 = true; 
+    boolean flag1 = true;
     boolean flag2 = true;
 
     // Declare motor controller objects for the robot drive system
@@ -152,7 +152,7 @@ public class RobotTemplate extends IterativeRobot {
             Timer.delay(1);
             moveRollerArmUp();
         }
-        
+
         //Robobees autonomous
         //start same way
         moveRollerArmDown();
@@ -271,7 +271,6 @@ public class RobotTemplate extends IterativeRobot {
         //********************************************************************
         //END OF NITAY'S ARCADE CODE 
         //********************************************************************
-        
         //start compressor
         m_compressor.start();
 
@@ -343,15 +342,15 @@ public class RobotTemplate extends IterativeRobot {
         if (m_gamepad.getRawButton(3)) { //Spins roller out to eject ball
             m_roller.set(1);
         }
-        
+
         if (m_gamepad.getRawButton(10) && flag1 == true) {
             flag2 = false;
         }
         if (!m_gamepad.getRawButton(10) && flag2 == false) {
             flag1 = false;
         }
-        
-        if (m_gamepad.getRawButton(10) && flag1 == false){
+
+        if (m_gamepad.getRawButton(10) && flag1 == false) {
             flag2 = true;
         }
         if (!m_gamepad.getRawButton(1) && flag2 == true) {
@@ -424,12 +423,12 @@ public class RobotTemplate extends IterativeRobot {
     }
 
     public void goForward() {
-        m_victor_l1.set(0.75);
-        m_victor_l2.set(0.75);
-        m_victor_l3.set(0.75);
-        m_victor_r1.set(0.75);
-        m_victor_r2.set(0.75);
-        m_victor_r3.set(0.75);
+        m_victor_l1.set(1);
+        m_victor_l2.set(1);
+        m_victor_l3.set(1);
+        m_victor_r1.set(-1);
+        m_victor_r2.set(-1);
+        m_victor_r3.set(-1);
         Timer.delay(2);
         m_victor_l1.set(0);
         m_victor_l2.set(0);
@@ -456,12 +455,12 @@ public class RobotTemplate extends IterativeRobot {
     }
 
     public void goBack() {
-        m_victor_l1.set(-0.75);
-        m_victor_l2.set(-0.75);
-        m_victor_l3.set(-0.75);
-        m_victor_r1.set(-0.75);
-        m_victor_r2.set(-0.75);
-        m_victor_r3.set(-0.75);
+        m_victor_l1.set(-1);
+        m_victor_l2.set(-1);
+        m_victor_l3.set(-1);
+        m_victor_r1.set(1);
+        m_victor_r2.set(1);
+        m_victor_r3.set(1);
         Timer.delay(2);
         m_victor_l1.set(0);
         m_victor_l2.set(0);
@@ -517,6 +516,41 @@ public class RobotTemplate extends IterativeRobot {
                 m_roller_arm2.set(-0.05);
             }
         }
+    }
+
+    public void startRollerBar() {
+        m_roller.set(1);
+    }
+
+    public void stopRollerBar() {
+        m_roller.set(0);
+    }
+
+    public void startDriveForward() {
+        m_victor_l1.set(1);
+        m_victor_l2.set(1);
+        m_victor_l3.set(1);
+        m_victor_r1.set(-1);
+        m_victor_r2.set(-1);
+        m_victor_r3.set(-1);
+    }
+
+    public void startDriveBack() {
+        m_victor_l1.set(-1);
+        m_victor_l2.set(-1);
+        m_victor_l3.set(-1);
+        m_victor_r1.set(1);
+        m_victor_r2.set(1);
+        m_victor_r3.set(1);
+    }
+
+    public void stopDrive() {
+        m_victor_l1.set(0);
+        m_victor_l2.set(0);
+        m_victor_l3.set(0);
+        m_victor_r1.set(0);
+        m_victor_r2.set(0);
+        m_victor_r3.set(0);
     }
 
 }
