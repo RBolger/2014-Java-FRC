@@ -43,7 +43,7 @@ public class RobotTemplate extends IterativeRobot {
     boolean longFiring = false; //Is the shooter performing a long shot?
     boolean isTimed = false; //Has the shooter delay timer running out?
     double shotTime; //Pegged to the FGPA timestamp, i.e. the global CRIO system time
-    boolean flag1 = true;
+    boolean flag1 = true; //Flags for changing drive directions
     boolean flag2 = true;
 
     // Declare motor controller objects for the robot drive system
@@ -150,6 +150,8 @@ public class RobotTemplate extends IterativeRobot {
             Timer.delay(1);
             moveRollerArmUp();
         }
+        
+        //Robobees autonomous
         //start same way
         moveRollerArmDown();
         Timer.delay(1.5);
