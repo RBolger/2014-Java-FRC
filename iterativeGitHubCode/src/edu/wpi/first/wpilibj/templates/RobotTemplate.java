@@ -166,7 +166,7 @@ public class RobotTemplate extends IterativeRobot {
         hardStopUp();
         Timer.delay(1);
         shoot();
-        Timer.delay(0.5);
+        Timer.delay(1.5);
         hardStopDown();
         Timer.delay(1);
         startRollerBar();
@@ -484,6 +484,7 @@ public class RobotTemplate extends IterativeRobot {
         double startTime = Timer.getFPGATimestamp();
         double loopTimer;
         while (!m_roller_limit_3.get() && !m_roller_limit_4.get()) {
+            m_roller.set(0.25);
             loopTimer = Timer.getFPGATimestamp();
             if ((loopTimer - startTime) > 3) {
                 break;
@@ -499,6 +500,7 @@ public class RobotTemplate extends IterativeRobot {
                 m_roller_arm2.set(-0.05);
             }
         }
+        m_roller.set(0);
     }
 
     public void moveRollerArmUp() {
