@@ -43,7 +43,9 @@ public class RobotTemplate extends IterativeRobot {
     boolean longFiring = false; //Is the shooter performing a long shot?
     boolean isTimed = false; //Has the shooter delay timer running out?
     double shotTime; //Pegged to the FGPA timestamp, i.e. the global CRIO system time
-    boolean flag1 = true; //Flags for changing drive directions
+    
+    //Flags for changing drive directions
+    boolean flag1 = true; 
     boolean flag2 = true;
 
     // Declare motor controller objects for the robot drive system
@@ -191,6 +193,7 @@ public class RobotTemplate extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopInit() {
+        //Initialize solenoids
         for (int i = 0; i < 4; i++) {
             DS[i].set(DoubleSolenoid.Value.kReverse);;
         }
@@ -268,6 +271,8 @@ public class RobotTemplate extends IterativeRobot {
         //********************************************************************
         //END OF NITAY'S ARCADE CODE 
         //********************************************************************
+        
+        //start compressor
         m_compressor.start();
 
         if (m_gamepad.getRawButton(2) && !down) { //Sets desired arm state from user input, sets lowering to be true if changing to down from up
