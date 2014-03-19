@@ -49,14 +49,14 @@ public class RobotTemplate extends IterativeRobot {
     boolean flag2 = true;
 
     // Declare motor controller objects for the robot drive system
-    Victor m_victor_l1;
-    Victor m_victor_l2;
-    Victor m_victor_l3;
-    Victor m_victor_r1;
-    Victor m_victor_r2;
-    Victor m_victor_r3;
-    Jaguar m_roller_arm1;
-    Jaguar m_roller_arm2;
+    Jaguar m_victor_l1;
+    Jaguar m_victor_l2;
+    Jaguar m_victor_l3;
+    Jaguar m_victor_r1;
+    Jaguar m_victor_r2;
+    Jaguar m_victor_r3;
+    Victor m_roller_arm1;
+    Victor m_roller_arm2;
     Jaguar m_roller;
 
     // Used for accessing the driver station message box, used by caling "getInstance()" followed by "println(int line, int startingColumn, String text)" and finally, "updateLCD()" to send the text to the driver station
@@ -82,14 +82,14 @@ public class RobotTemplate extends IterativeRobot {
 
     public RobotTemplate() {
         // Initialize motor controllers
-        m_victor_l1 = new Victor(1);
-        m_victor_l2 = new Victor(2);
-        m_victor_l3 = new Victor(3);
-        m_victor_r1 = new Victor(4);
-        m_victor_r2 = new Victor(5);
-        m_victor_r3 = new Victor(6);
-        m_roller_arm1 = new Jaguar(7);
-        m_roller_arm2 = new Jaguar(8);
+        m_victor_l1 = new Jaguar(1);
+        m_victor_l2 = new Jaguar(2);
+        m_victor_l3 = new Jaguar(3);
+        m_victor_r1 = new Jaguar(4);
+        m_victor_r2 = new Jaguar(5);
+        m_victor_r3 = new Jaguar(6);
+        m_roller_arm1 = new Victor(7);
+        m_roller_arm2 = new Victor(8);
         m_roller = new Jaguar(9);
 
         // Initialize limit switches
@@ -287,25 +287,25 @@ public class RobotTemplate extends IterativeRobot {
 
         if (down) { //Moving the arm to desired state
             if (!m_roller_limit_4.get()) {
-                m_roller_arm1.set(0.80);
-            } else {
                 m_roller_arm1.set(0.1);
+            } else {
+                m_roller_arm1.set(0.02);
             }
             if (!m_roller_limit_3.get()) {
-                m_roller_arm2.set(-0.80);
-            } else {
                 m_roller_arm2.set(-0.1);
+            } else {
+                m_roller_arm2.set(-0.02);
             }
         } else {
             if (!m_roller_limit_2.get()) {
-                m_roller_arm1.set(-0.80);
+                m_roller_arm1.set(-0.3);
             } else {
-                m_roller_arm1.set(-0.1);
+                m_roller_arm1.set(-0.05);
             }
             if (!m_roller_limit_1.get()) {
-                m_roller_arm2.set(0.80);
+                m_roller_arm2.set(0.3);
             } else {
-                m_roller_arm2.set(0.1);
+                m_roller_arm2.set(0.05);
             }
         }
         if (lowering) { //Prevents ball from getting yanked off catapult if lowering arm, but does not run roller in at 25% if arm bumps off of limit switches
@@ -339,12 +339,15 @@ public class RobotTemplate extends IterativeRobot {
 
         if (m_gamepad.getRawButton(4) && down) { //Spins roller in for ball acquisition
             m_roller.set(-1);
-        }
-        if (m_gamepad.getRawButton(4)) { //Spins roller in slowly for ball adjustment if roller is in up position
+        } else if (m_gamepad.getRawButton(4)) { //Spins roller in slowly for ball adjustment if roller is in up position
             m_roller.set(-25);
+        } else if (!m_gamepad.getRawButton(3)) {
+            m_roller.set(0);
         }
         if (m_gamepad.getRawButton(3)) { //Spins roller out to eject ball
             m_roller.set(1);
+        } else if (!m_gamepad.getRawButton(4)) {
+            m_roller.set(0);
         }
 
         if (m_gamepad.getRawButton(10) && flag1 == true) {
@@ -357,7 +360,7 @@ public class RobotTemplate extends IterativeRobot {
         if (m_gamepad.getRawButton(10) && flag1 == false) {
             flag2 = true;
         }
-        if (!m_gamepad.getRawButton(1) && flag2 == true) {
+        if (!m_gamepad.getRawButton(10) && flag2 == true) {
             flag1 = true;
         }
 
