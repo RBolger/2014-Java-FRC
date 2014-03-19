@@ -51,7 +51,7 @@ public class RobotTemplate extends IterativeRobot {
     //Flags for roller
     boolean running = false;
     boolean rollerBarButtonCheck = true;
-    boolean rollerArmButtonCheck=true;
+    boolean rollerArmButtonCheck = true;
 
     // Declare motor controller objects for the robot drive system
     Jaguar m_victor_l1;
@@ -291,18 +291,17 @@ public class RobotTemplate extends IterativeRobot {
         //********************************************************************
         //start compressor
         m_compressor.start();
-        
-        if(m_gamepad.getRawButton(1)&&rollerArmButtonCheck){
-            down=!down;
-            rollerArmButtonCheck=false;
-            if(down){
-                lowering=true;
+
+        if (m_gamepad.getRawButton(1) && rollerArmButtonCheck) {
+            down = !down;
+            rollerArmButtonCheck = false;
+            if (down) {
+                lowering = true;
             }
         }
-        
-        if(!m_gamepad.getRawButton(1))
-        {
-            rollerArmButtonCheck=true;
+
+        if (!m_gamepad.getRawButton(1)) {
+            rollerArmButtonCheck = true;
         }
 
 //        if (m_gamepad.getRawButton(2) && !down) { //Sets desired arm state from user input, sets lowering to be true if changing to down from up
@@ -311,7 +310,6 @@ public class RobotTemplate extends IterativeRobot {
 //        } else if (m_gamepad.getRawButton(1) && down) {
 //            down = false;
 //        }
-
         if (down) { //Moving the arm to desired state
             if (!m_roller_limit_4.get()) {
                 m_roller_arm1.set(0.1);
@@ -433,6 +431,7 @@ public class RobotTemplate extends IterativeRobot {
             DS[3].set(DoubleSolenoid.Value.kReverse);
             isTimed = false;
             closeFiring = false;
+            driveDirection = true;
         }
     }
 
@@ -457,6 +456,7 @@ public class RobotTemplate extends IterativeRobot {
             DS[3].set(DoubleSolenoid.Value.kReverse);
             isTimed = false;
             longFiring = false;
+            driveDirection = true;
         }
     }
 
