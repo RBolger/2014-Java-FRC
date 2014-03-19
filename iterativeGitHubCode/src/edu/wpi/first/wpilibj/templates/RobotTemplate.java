@@ -48,6 +48,10 @@ public class RobotTemplate extends IterativeRobot {
     boolean flag1 = true;
     boolean flag2 = true;
 
+    //Flags for roller
+    boolean running = false;
+    boolean buttonCheck = true;
+
     // Declare motor controller objects for the robot drive system
     Jaguar m_victor_l1;
     Jaguar m_victor_l2;
@@ -289,27 +293,31 @@ public class RobotTemplate extends IterativeRobot {
             if (!m_roller_limit_4.get()) {
                 m_roller_arm1.set(0.1);
             } else {
-                m_roller_arm1.set(0.02);
+                m_roller_arm1.set(0);
             }
+
             if (!m_roller_limit_3.get()) {
                 m_roller_arm2.set(-0.1);
             } else {
-                m_roller_arm2.set(-0.02);
+                m_roller_arm2.set(0);
             }
+
         } else {
             if (!m_roller_limit_2.get()) {
                 m_roller_arm1.set(-0.3);
             } else {
-                m_roller_arm1.set(-0.05);
+                m_roller_arm1.set(0.05);
             }
+
             if (!m_roller_limit_1.get()) {
                 m_roller_arm2.set(0.3);
             } else {
                 m_roller_arm2.set(0.05);
             }
+
         }
         if (lowering) { //Prevents ball from getting yanked off catapult if lowering arm, but does not run roller in at 25% if arm bumps off of limit switches
-            m_roller.set(0.25);
+            m_roller.set(-0.25);
             if (m_roller_limit_3.get() && m_roller_limit_4.get()) {
                 m_roller.set(0);
                 lowering = false;
@@ -337,17 +345,28 @@ public class RobotTemplate extends IterativeRobot {
             longShoot();
         }
 
-        if (m_gamepad.getRawButton(4) && down) { //Spins roller in for ball acquisition
-            m_roller.set(-1);
-        } else if (m_gamepad.getRawButton(4)) { //Spins roller in slowly for ball adjustment if roller is in up position
-            m_roller.set(-25);
-        } else if (!m_gamepad.getRawButton(3)) {
+        if (down) {
+            if (running) {
+                m_roller.set(-1);
+            } else if (!lowering) {
+                m_roller.set(0);
+            }
+        } else {
+            running = false;
             m_roller.set(0);
         }
-        if (m_gamepad.getRawButton(3)) { //Spins roller out to eject ball
+
+        if (m_gamepad.getRawButton(4) && buttonCheck) {
+            running = !running;
+            buttonCheck = false;
+        }
+        
+        if (m_gamepad.getRawButton(4) && !down) {
             m_roller.set(1);
-        } else if (!m_gamepad.getRawButton(4)) {
-            m_roller.set(0);
+        }
+
+        if (!m_gamepad.getRawButton(4)) {
+            buttonCheck = true;
         }
 
         if (m_gamepad.getRawButton(10) && flag1 == true) {
@@ -478,7 +497,7 @@ public class RobotTemplate extends IterativeRobot {
     }
 
     public void pickUp() {
-        m_roller.set(0.75);
+        m_roller.set(-0.75);
         Timer.delay(1.5);
         m_roller.set(0);
     }
@@ -487,7 +506,7 @@ public class RobotTemplate extends IterativeRobot {
         double startTime = Timer.getFPGATimestamp();
         double loopTimer;
         while (!m_roller_limit_3.get() && !m_roller_limit_4.get()) {
-            m_roller.set(0.25);
+            m_roller.set(-0.25);
             loopTimer = Timer.getFPGATimestamp();
             if ((loopTimer - startTime) > 3) {
                 break;
@@ -528,7 +547,7 @@ public class RobotTemplate extends IterativeRobot {
     }
 
     public void startRollerBar() {
-        m_roller.set(1);
+        m_roller.set(-1);
     }
 
     public void stopRollerBar() {
