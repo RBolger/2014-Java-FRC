@@ -45,8 +45,8 @@ public class RobotTemplate extends IterativeRobot {
     double shotTime; //Pegged to the FGPA timestamp, i.e. the global CRIO system time
 
     //Flags for changing drive directions
-    boolean flag1 = true;
-    boolean flag2 = true;
+    boolean driveDirection = true;
+    boolean driveButtonCheck = true;
 
     //Flags for roller
     boolean running = false;
@@ -120,7 +120,7 @@ public class RobotTemplate extends IterativeRobot {
             DS[i] = new DoubleSolenoid(i + 1, i + 5);
         }
 
-        SmartDashboard.putNumber("Drive Speed Multiplier", 0);
+        SmartDashboard.putNumber("Drive Speed Multiplier", 0.25);
 
     }
 
@@ -249,7 +249,7 @@ public class RobotTemplate extends IterativeRobot {
         }
 
         //Add forward and turning values such that -turning value turns robot right.
-        if (!flag1) {
+        if (!driveDirection) {
             forward_output *= -1;
         }
         left_output = forward_output - turn_output;
@@ -392,18 +392,18 @@ public class RobotTemplate extends IterativeRobot {
             rollerBarButtonCheck = true;
         }
 
-        if (m_gamepad.getRawButton(10) && flag1 == true) {
-            flag2 = false;
+        if (m_gamepad.getRawButton(10) && driveDirection == true) {
+            driveButtonCheck = false;
         }
-        if (!m_gamepad.getRawButton(10) && flag2 == false) {
-            flag1 = false;
+        if (!m_gamepad.getRawButton(10) && driveButtonCheck == false) {
+            driveDirection = false;
         }
 
-        if (m_gamepad.getRawButton(10) && flag1 == false) {
-            flag2 = true;
+        if (m_gamepad.getRawButton(10) && driveDirection == false) {
+            driveButtonCheck = true;
         }
-        if (!m_gamepad.getRawButton(10) && flag2 == true) {
-            flag1 = true;
+        if (!m_gamepad.getRawButton(10) && driveButtonCheck == true) {
+            driveDirection = true;
         }
 
         System.out.println("Limit Switch 1: " + m_roller_limit_1.get());
