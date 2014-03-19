@@ -50,7 +50,8 @@ public class RobotTemplate extends IterativeRobot {
 
     //Flags for roller
     boolean running = false;
-    boolean buttonCheck = true;
+    boolean rollerBarButtonCheck = true;
+    boolean rollerArmButtonCheck=true;
 
     // Declare motor controller objects for the robot drive system
     Jaguar m_victor_l1;
@@ -248,6 +249,9 @@ public class RobotTemplate extends IterativeRobot {
         }
 
         //Add forward and turning values such that -turning value turns robot right.
+        if (!flag1) {
+            forward_output *= -1;
+        }
         left_output = forward_output - turn_output;
         right_output = forward_output + turn_output;
 
@@ -260,34 +264,53 @@ public class RobotTemplate extends IterativeRobot {
         }
         left_output *= SmartDashboard.getNumber("Drive Speed Multiplier");
         right_output *= SmartDashboard.getNumber("Drive Speed Multiplier");
-        if (flag1) {
-            m_victor_l1.set(-left_output);
-            m_victor_l2.set(-left_output);
-            m_victor_l3.set(-left_output);
-            m_victor_r1.set(right_output);
-            m_victor_r2.set(right_output);
-            m_victor_r3.set(right_output);
-        } else {
-            m_victor_l1.set(left_output);
-            m_victor_l2.set(left_output);
-            m_victor_l3.set(left_output);
-            m_victor_r1.set(-right_output);
-            m_victor_r2.set(-right_output);
-            m_victor_r3.set(-right_output);
-        }
+        m_victor_l1.set(-left_output);
+        m_victor_l2.set(-left_output);
+        m_victor_l3.set(-left_output);
+        m_victor_r1.set(right_output);
+        m_victor_r2.set(right_output);
+        m_victor_r3.set(right_output);
+//        if (flag1) {
+//            m_victor_l1.set(-left_output);
+//            m_victor_l2.set(-left_output);
+//            m_victor_l3.set(-left_output);
+//            m_victor_r1.set(right_output);
+//            m_victor_r2.set(right_output);
+//            m_victor_r3.set(right_output);
+//        } else {
+//            m_victor_l1.set(-left_output);
+//            m_victor_l2.set(-left_output);
+//            m_victor_l3.set(-left_output);
+//            m_victor_r1.set(right_output);
+//            m_victor_r2.set(right_output);
+//            m_victor_r3.set(right_output);
+//        }
 
         //********************************************************************
         //END OF NITAY'S ARCADE CODE 
         //********************************************************************
         //start compressor
         m_compressor.start();
-
-        if (m_gamepad.getRawButton(2) && !down) { //Sets desired arm state from user input, sets lowering to be true if changing to down from up
-            down = true;
-            lowering = true;
-        } else if (m_gamepad.getRawButton(1) && down) {
-            down = false;
+        
+        if(m_gamepad.getRawButton(1)&&rollerArmButtonCheck){
+            down=!down;
+            rollerArmButtonCheck=false;
+            if(down){
+                lowering=true;
+            }
         }
+        
+        if(!m_gamepad.getRawButton(1))
+        {
+            rollerArmButtonCheck=true;
+        }
+
+//        if (m_gamepad.getRawButton(2) && !down) { //Sets desired arm state from user input, sets lowering to be true if changing to down from up
+//            down = true;
+//            lowering = true;
+//        } else if (m_gamepad.getRawButton(1) && down) {
+//            down = false;
+//        }
 
         if (down) { //Moving the arm to desired state
             if (!m_roller_limit_4.get()) {
@@ -356,17 +379,17 @@ public class RobotTemplate extends IterativeRobot {
             m_roller.set(0);
         }
 
-        if (m_gamepad.getRawButton(4) && buttonCheck) {
+        if (m_gamepad.getRawButton(4) && rollerBarButtonCheck) {
             running = !running;
-            buttonCheck = false;
+            rollerBarButtonCheck = false;
         }
-        
+
         if (m_gamepad.getRawButton(4) && !down) {
             m_roller.set(1);
         }
 
         if (!m_gamepad.getRawButton(4)) {
-            buttonCheck = true;
+            rollerBarButtonCheck = true;
         }
 
         if (m_gamepad.getRawButton(10) && flag1 == true) {
