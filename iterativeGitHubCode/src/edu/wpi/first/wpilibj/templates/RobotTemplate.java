@@ -43,10 +43,17 @@ public class RobotTemplate extends IterativeRobot {
     boolean longFiring = false; //Is the shooter performing a long shot?
     boolean isTimed = false; //Has the shooter delay timer running out?
     double shotTime; //Pegged to the FGPA timestamp, i.e. the global CRIO system time
+    boolean rollerIsTimed = false;
+    double rollerTime;
+    boolean interrupted = false;
 
     //Flags for changing drive directions
     boolean driveDirection = true;
     boolean driveButtonCheck = true;
+
+    //Flags for precision
+    boolean normalSpeed = true;
+    boolean precisionButtonCheck = true;
 
     //Flags for roller
     boolean running = false;
@@ -59,7 +66,7 @@ public class RobotTemplate extends IterativeRobot {
     Jaguar m_victor_l3;
     Jaguar m_victor_r1;
     Jaguar m_victor_r2;
-    Jaguar m_victor_r3;
+    Victor m_victor_r3;
     Victor m_roller_arm1;
     Victor m_roller_arm2;
     Jaguar m_roller;
@@ -92,7 +99,7 @@ public class RobotTemplate extends IterativeRobot {
         m_victor_l3 = new Jaguar(3);
         m_victor_r1 = new Jaguar(4);
         m_victor_r2 = new Jaguar(5);
-        m_victor_r3 = new Jaguar(6);
+        m_victor_r3 = new Victor(6);
         m_roller_arm1 = new Victor(7);
         m_roller_arm2 = new Victor(8);
         m_roller = new Jaguar(9);
@@ -104,10 +111,10 @@ public class RobotTemplate extends IterativeRobot {
         m_roller_limit_4 = new DigitalInput(4);
 
         //Initialize shot toggle switch
-        m_shoot_toggle = new DigitalInput(5);
+        m_shoot_toggle = new DigitalInput(6);
 
         // Initialize compressor
-        m_compressor = new Compressor(6, 1);
+        m_compressor = new Compressor(5, 1);
     }
 
     public void robotInit() {
@@ -117,8 +124,10 @@ public class RobotTemplate extends IterativeRobot {
         // Initialize solenoids
         DS = new DoubleSolenoid[4];
         for (int i = 0; i < 4; i++) {
-            DS[i] = new DoubleSolenoid(i + 1, i + 5);
+            DS[i] = new DoubleSolenoid(1, i + 1, i + 5);
         }
+
+        hardStop = new DoubleSolenoid(2, 1, 5);
 
         SmartDashboard.putNumber("Drive Speed Multiplier", 0.25);
 
@@ -128,43 +137,58 @@ public class RobotTemplate extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        goForward();
-        moveRollerArmDown();
-        Timer.delay(1.5);
-        hardStopUp();
-        Timer.delay(0.5);
-        shoot();
-        if (m_shoot_toggle.get()) {
-            hardStopDown();
-            Timer.delay(0.5);
-            goBack();
-            pickUp();
-            moveRollerArmUp();
-            Timer.delay(1);
-            goForward();
-            moveRollerArmDown();
-            Timer.delay(1.5);
-            hardStopUp();
-            Timer.delay(1);
-            shoot();
-            Timer.delay(0.5);
-            hardStopDown();
-            Timer.delay(0.5);
-            moveRollerArmUp();
-        } else {
-            Timer.delay(0.5);
-            hardStopDown();
-            Timer.delay(1);
-            moveRollerArmUp();
-        }
+        //One ball long shot
+       /* startDriveForward();
+         Timer.delay(1);
+         stopDrive();
+         moveRollerArmDown();
+         Timer.delay(1);
+         hardStopUp();
+         Timer.delay(1);
+         shoot();
+        
+         //Two ball
+         if (m_shoot_toggle.get()) {
+         hardStopDown();
+         Timer.delay(0.5);
+         goBack();
+         pickUp();
+         moveRollerArmUp();
+         Timer.delay(1);
+         goForward();
+         moveRollerArmDown();
+         Timer.delay(1.5);
+         hardStopUp();
+         Timer.delay(1);
+         shoot();
+         Timer.delay(0.5);
+         hardStopDown();
+         Timer.delay(0.5);
+         moveRollerArmUp();
+         } else { //One ball
+         Timer.delay(0.5);
+         hardStopDown();
+         Timer.delay(1);
+         moveRollerArmUp();
+         } */
 
+        //One ball lob shot
+         startDriveForward();
+         Timer.delay(2.5);
+         stopDrive();
+         moveRollerArmDown();
+         Timer.delay(1);
+         shoot();
+         Timer.delay(1);
+         moveRollerArmUp();
+        
         //Robobees autonomous
         //start same way
-        moveRollerArmDown();
-        Timer.delay(1.5);
+        /*moveRollerArmDown();
+        Timer.delay(1);
         startRollerBar(); //might need to make this constant rather than timed
         startDriveForward();
-        Timer.delay(1);
+        Timer.delay(0.5);
         stopRollerBar();
         stopDrive();
         Timer.delay(0.5);
@@ -182,7 +206,7 @@ public class RobotTemplate extends IterativeRobot {
         Timer.delay(0.5);
         hardStopDown();
         Timer.delay(0.5);
-        moveRollerArmUp();
+        moveRollerArmUp(); */
 
         //lower roller arm
         //bar spin inward
@@ -202,10 +226,11 @@ public class RobotTemplate extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopInit() {
-        //Initialize solenoids
+        //Initialize solenoid lights
         for (int i = 0; i < 4; i++) {
-            DS[i].set(DoubleSolenoid.Value.kReverse);;
+            DS[i].set(DoubleSolenoid.Value.kReverse);
         }
+        hardStop.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void teleopPeriodic() {
@@ -264,12 +289,26 @@ public class RobotTemplate extends IterativeRobot {
         }
         left_output *= SmartDashboard.getNumber("Drive Speed Multiplier");
         right_output *= SmartDashboard.getNumber("Drive Speed Multiplier");
-        m_victor_l1.set(-left_output);
-        m_victor_l2.set(-left_output);
-        m_victor_l3.set(-left_output);
-        m_victor_r1.set(right_output);
-        m_victor_r2.set(right_output);
-        m_victor_r3.set(right_output);
+        if (normalSpeed) {
+            m_victor_l1.set(-left_output);
+            m_victor_l2.set(-left_output);
+            m_victor_l3.set(-left_output);
+            m_victor_r1.set(right_output);
+            m_victor_r2.set(right_output);
+            m_victor_r3.set(right_output);
+        }
+
+        SmartDashboard.putNumber("Left Output", left_output);
+        SmartDashboard.putNumber("Right Output", right_output);
+
+        if (!normalSpeed) {
+            m_victor_l1.set(-left_output * 0.5);
+            m_victor_l2.set(-left_output * 0.5);
+            m_victor_l3.set(-left_output * 0.5);
+            m_victor_r1.set(right_output * 0.5);
+            m_victor_r2.set(right_output * 0.5);
+            m_victor_r3.set(right_output * 0.5);
+        }
 //        if (flag1) {
 //            m_victor_l1.set(-left_output);
 //            m_victor_l2.set(-left_output);
@@ -291,7 +330,6 @@ public class RobotTemplate extends IterativeRobot {
         //********************************************************************
         //start compressor
         m_compressor.start();
-
         if (m_gamepad.getRawButton(1) && rollerArmButtonCheck) {
             down = !down;
             rollerArmButtonCheck = false;
@@ -311,28 +349,20 @@ public class RobotTemplate extends IterativeRobot {
 //            down = false;
 //        }
         if (down) { //Moving the arm to desired state
-            if (!m_roller_limit_4.get()) {
+            if (!m_roller_limit_4.get() || !m_roller_limit_3.get()) {
                 m_roller_arm1.set(0.1);
-            } else {
-                m_roller_arm1.set(0);
-            }
-
-            if (!m_roller_limit_3.get()) {
                 m_roller_arm2.set(-0.1);
             } else {
+                m_roller_arm1.set(0);
                 m_roller_arm2.set(0);
             }
 
         } else {
-            if (!m_roller_limit_2.get()) {
+            if (!m_roller_limit_2.get() || !m_roller_limit_1.get()) {
                 m_roller_arm1.set(-0.3);
-            } else {
-                m_roller_arm1.set(0.05);
-            }
-
-            if (!m_roller_limit_1.get()) {
                 m_roller_arm2.set(0.3);
             } else {
+                m_roller_arm1.set(0.05);
                 m_roller_arm2.set(0.05);
             }
 
@@ -383,35 +413,60 @@ public class RobotTemplate extends IterativeRobot {
         }
 
         if (m_gamepad.getRawButton(4) && !down) {
+            if (!rollerIsTimed) {
+                rollerTime = Timer.getFPGATimestamp();
+                rollerIsTimed = true;
+                interrupted = true;
+            }
+        }
+
+        if ((Timer.getFPGATimestamp() - rollerTime) < 2 && !down) {
             m_roller.set(1);
+        } else if (interrupted) {
+            m_roller.set(0);
+            rollerIsTimed = false;
+        } else if (rollerIsTimed) {
+            m_roller.set(0);
+            rollerIsTimed = false;
+        }
+
+        if (m_roller_limit_3.get() && m_roller_limit_4.get()) {
+            interrupted = false;
         }
 
         if (!m_gamepad.getRawButton(4)) {
             rollerBarButtonCheck = true;
         }
 
-        if (m_gamepad.getRawButton(10) && driveDirection == true) {
+        if (m_gamepad.getRawButton(9) && normalSpeed) {
+            precisionButtonCheck = false;
+        }
+        if (!m_gamepad.getRawButton(9) && !precisionButtonCheck) {
+            normalSpeed = false;
+        }
+
+        if (m_gamepad.getRawButton(9) && !normalSpeed) {
+            precisionButtonCheck = true;
+        }
+        if (!m_gamepad.getRawButton(9) && precisionButtonCheck) {
+            normalSpeed = true;
+        }
+
+        if (m_gamepad.getRawButton(10) && driveDirection) {
             driveButtonCheck = false;
         }
-        if (!m_gamepad.getRawButton(10) && driveButtonCheck == false) {
+        if (!m_gamepad.getRawButton(10) && !driveButtonCheck) {
             driveDirection = false;
         }
 
-        if (m_gamepad.getRawButton(10) && driveDirection == false) {
+        if (m_gamepad.getRawButton(10) && !driveDirection) {
             driveButtonCheck = true;
         }
-        if (!m_gamepad.getRawButton(10) && driveButtonCheck == true) {
+        if (!m_gamepad.getRawButton(10) && driveButtonCheck) {
             driveDirection = true;
         }
 
-        System.out.println("Limit Switch 1: " + m_roller_limit_1.get());
-        System.out.println("Limit Switch 2: " + m_roller_limit_2.get());
-        System.out.println("Limit Switch 3: " + m_roller_limit_3.get());
-        System.out.println("Limit Switch 4: " + m_roller_limit_4.get());
-        System.out.println("Down: " + down);
-        System.out.println("Lowering: " + lowering);
-        System.out.println("Long shot: " + longFiring);
-        System.out.println("Close shot: " + closeFiring);
+        System.out.println("Interrupted: " + interrupted);
 
     }
 
@@ -421,8 +476,8 @@ public class RobotTemplate extends IterativeRobot {
             isTimed = true;
         } else if ((Timer.getFPGATimestamp() - shotTime) <= 1.5) { //Fires cylinders if timer has not expired
             DS[0].set(DoubleSolenoid.Value.kForward);
-            DS[1].set(DoubleSolenoid.Value.kForward);
-            DS[2].set(DoubleSolenoid.Value.kForward);
+            //DS[1].set(DoubleSolenoid.Value.kForward);
+            //DS[2].set(DoubleSolenoid.Value.kForward);
             DS[3].set(DoubleSolenoid.Value.kForward);
         } else { //Retracts cylinders, ends firing cycle once timer expires
             DS[0].set(DoubleSolenoid.Value.kReverse);
@@ -440,16 +495,14 @@ public class RobotTemplate extends IterativeRobot {
             shotTime = Timer.getFPGATimestamp();
             isTimed = true;
         } else if ((Timer.getFPGATimestamp() - shotTime) <= 1) {
-            //hardStop.set(DoubleSolenoid.Value.kForward);
-            System.out.println("There's no hardstop, silly!");
-        } else if ((Timer.getFPGATimestamp() - shotTime) <= 1.5) {
+            hardStop.set(DoubleSolenoid.Value.kForward);
+        } else if ((Timer.getFPGATimestamp() - shotTime) <= 2.5) {
             DS[0].set(DoubleSolenoid.Value.kForward);
             DS[1].set(DoubleSolenoid.Value.kForward);
             DS[2].set(DoubleSolenoid.Value.kForward);
             DS[3].set(DoubleSolenoid.Value.kForward);
         } else {
-            //hardStop.set(DoubleSolenoid.Value.kReverse);
-            System.out.println("There's no hardstop, silly!");
+            hardStop.set(DoubleSolenoid.Value.kReverse);
             DS[0].set(DoubleSolenoid.Value.kReverse);
             DS[1].set(DoubleSolenoid.Value.kReverse);
             DS[2].set(DoubleSolenoid.Value.kReverse);
@@ -534,13 +587,13 @@ public class RobotTemplate extends IterativeRobot {
             if ((loopTimer - startTime) > 3) {
                 break;
             }
-            if (!m_roller_limit_3.get()) {
-                m_roller_arm1.set(0.80);
+            if (!m_roller_limit_4.get()) {
+                m_roller_arm1.set(0.10);
             } else {
                 m_roller_arm1.set(0.05);
             }
-            if (!m_roller_limit_4.get()) {
-                m_roller_arm2.set(-0.80);
+            if (!m_roller_limit_3.get()) {
+                m_roller_arm2.set(-0.10);
             } else {
                 m_roller_arm2.set(-0.05);
             }
@@ -556,15 +609,15 @@ public class RobotTemplate extends IterativeRobot {
             if ((loopTimer - startTime) > 3) {
                 break;
             }
-            if (!m_roller_limit_1.get()) {
-                m_roller_arm1.set(0.80);
-            } else {
-                m_roller_arm1.set(0.05);
-            }
             if (!m_roller_limit_2.get()) {
-                m_roller_arm2.set(-0.80);
+                m_roller_arm1.set(-0.30);
             } else {
-                m_roller_arm2.set(-0.05);
+                m_roller_arm1.set(-0.05);
+            }
+            if (!m_roller_limit_1.get()) {
+                m_roller_arm2.set(0.30);
+            } else {
+                m_roller_arm2.set(0.05);
             }
         }
     }
